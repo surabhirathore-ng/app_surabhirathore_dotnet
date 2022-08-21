@@ -45,7 +45,7 @@ pipeline {
             steps {
 				  echo "Start sonarqube analysis step"
                   withSonarQubeEnv('Test_Sonar') {
-                   bat "dotnet ${scannerHome}\\SonarScanner.MSBuild.dll begin /k:sonar-${username} -d:sonar.cs.opencover.reportsPaths=test-project/coverage.opencover.xml -d:sonar.cs.xunit.reportsPaths='test-project/TestResults/TestFileReport.xml'"  
+                   bat "dotnet ${scannerHome}\\SonarScanner.MSBuild.dll begin /k:sonar-${username}"  
                   }
             }
         }
