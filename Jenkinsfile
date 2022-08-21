@@ -32,7 +32,7 @@ pipeline {
             steps {
 		    
                 //Initial message
-                echo "Deployment pipeline started for - ${BRANCH_NAME} branch"
+                echo "Deployment pipeline started for  branch"
 		        checkout scm
                 echo "Nuget Restore step"
                 bat "dotnet restore"
