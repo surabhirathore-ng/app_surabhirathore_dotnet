@@ -75,6 +75,10 @@ pipeline {
         withSonarQubeEnv("Test_Sonar") {
           bat "dotnet ${scannerHome}\\SonarScanner.MSBuild.dll end"
 		}
+		
+    }
+
+ }	
 
     stage ("Release artifact") {
            
