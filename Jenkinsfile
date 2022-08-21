@@ -4,8 +4,8 @@ pipeline {
 	environment {
 		scannerHome = tool name: 'sonar_scanner_dotnet'
 		registry = 'surabhirathore'
-		username = 'surabhi.rathore'
-        appName = 'DevopsApp'
+		username = 'sonar-surabhirathore'
+        appName = 'NAGPDevOpsProject'
    	}	
    
 	options {
@@ -28,7 +28,7 @@ pipeline {
     
     stages {
         
-    	stage ("nuget restore") {
+    	stage ("Nuget restore") {
             steps {
 		    
                 //Initial message
@@ -45,37 +45,45 @@ pipeline {
             steps {
 				  echo "Start sonarqube analysis step"
                   withSonarQubeEnv('Test_Sonar') {
-                   bat "${scannerHome}\\SonarScanner.MSBuild.exe begin /k:sonar-${userName} /n:sonar-${userName} /v:1.0"
+                   bat "dotnet ${scannerHome}\\SonarScanner.MSBuild.dll begin /k:sonar-${username} -d:sonar.cs.opencover.reportsPaths=test-project/coverage.opencover.xml -d:sonar.cs.xunit.reportsPaths='test-project/TestResults/TestFileReport.xml'"  
                   }
             }
         }
 
-        stage('Code build') {
+       stage('Code build') {
+      steps {
+        //Cleans the output of the project
+        echo "Clean Previous Build"
+        bat "dotnet clean"
+
+        //Builds the project and all its dependencies
+        echo "Code Build"
+        bat 'dotnet build --configuration Release"'
+      }
+    }
+
+    stage('Test Case Execution') {
+      steps {
+        echo "Execute Unit Test"
+        bat "dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=opencover -l:trx;LogFileName=TestFileReport.xml"
+      }
+    }
+
+    stage('Stop SonarQube Analysis') {
+      steps {
+        echo "Stop SonarQube Analysis"
+        withSonarQubeEnv("Test_Sonar") {
+          bat "dotnet ${scannerHome}\\SonarScanner.MSBuild.dll end"
+		}
+
+    stage ("Release artifact") {
+           
+
             steps {
-				  //Cleans the output of a project
-				  echo "Clean Previous Build"
-                  bat "dotnet clean"
-				  
-				  //Builds the project and all of its dependencies
-                  echo "Code Build"
-                  bat 'dotnet build -c Release -o "DevopsApp/app/build"'		      
+                echo "Release artifact step"
+                bat "dotnet publish -c Release -o ${appName}/app/${userName}"
             }
-        }
-
-		stage('Stop sonarqube analysis'){
-             when {
-                branch "master"
-            }
-            
-			steps {
-				   echo "Stop sonarqube analysis"
-                   withSonarQubeEnv('Test_Sonar') {
-                   bat "${scannerHome}\\SonarScanner.MSBuild.exe end"
-                   }
-            }
-        }
-
-        
+        }    
 }
 }
 
